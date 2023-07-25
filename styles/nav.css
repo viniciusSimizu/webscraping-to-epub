@@ -1,0 +1,15 @@
+@namespace epub "http://www.idpf.org/2007/ops";
+
+body {
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
+
+h2 {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+ol {
+  display: flex;
+  flex-direction: column;
+  row-gap: 8px;
+}

@@ -99,7 +99,7 @@ class Volume:
         """Set book metadata"""
         self._book.set_title(self._config['title'])
         self._book.add_author(self._config['author'])
-        self._book.set_direction('rtl')
+        self._book.set_direction('')
         self._book.set_language(self._config['lang'])
         self._book.add_metadata(None, 'meta', '', {'name': 'calibre:series',
                                                    'content': self._config['series']})
@@ -107,6 +107,8 @@ class Volume:
     def _create_config(self, data: VolumeData) -> VolumeConfig:
         return {
             'title': generate_volume_title(data['title'], 'Youkoso Jitsuryoku', data['order']),
+            'author': 'Shōgo Kinugasa',
+            'series': 'Youkoso Jitsuryoku',
             'cover_link': data['cover_link'],
             'order': data['order'],
             'lang': 'pt-br',

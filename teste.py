@@ -1,7 +1,21 @@
-from pipe import izip, map, select
+import asyncio
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from multiprocessing.pool import Pool, ThreadPool
+import time
 
-data = list(['a', 'b']
-            | izip(['1', '2'])
-            | select(lambda x, y: x+y))
 
-print(data)
+def func(value: int) -> int:
+    time.sleep(value)
+
+
+async def main() -> None:
+    values = range(7)
+
+    with ProcessPoolExecutor(3) as pool:
+        start = time.perf_counter()
+        for _ in pool.map(func, values):
+            end = time.perf_counter()
+            print(end - start)
+
+
+asyncio.run(main())

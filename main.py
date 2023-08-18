@@ -1,14 +1,61 @@
 import asyncio
+import logging
+from concurrent.futures import ProcessPoolExecutor
+from os import cpu_count
+from pathlib import Path
+from typing import Type
 
+import tldextract
 from aiohttp import ClientSession
 
-from sites.customs.anime_center_br import AnimeCenterBr
+from ebook_api.volume import Volume
+from sites import sites
+from sites.site_abstract import Site
+
+logging.basicConfig(format='[%(levelname)s]: %(message)s.\n%(asctime)s - %(pathname)s',
+                    level=logging.DEBUG,
+                    filename=Path('.log'),
+                    filemode='w')
+
+log = logging.getLogger(__name__)
 
 
 async def main():
-    queue = asyncio.Queue(1)
+    queue = asyncio.Queue(4)
+
     async with ClientSession() as client:
-        await AnimeCenterBr(client, queue).extract_volume_data('')
+        with ProcessPoolExecutor(max_workers=max(1, cpu_count() - 1)) as pool:
+            with open('links.txt', 'r') as file:
+                while link := file.readline():
+                    domain = tldextract.extract(link).domain
+
+                    site = find_site(domain)
+
+                    if not site:
+                        log.warning(
+                            'The given url domain is not implemented')
+                        continue
+
+                    log.info(f"Processing following url: {link}")
+                    async with asyncio.TaskGroup() as tg:
+                        producer = tg.create_task(site(client=client,
+                                                       queue=queue,
+                                                       pool=pool).producer_volume_data(url=link))
+                        consumer = tg.create_task(
+                            Volume.consume_volume_data(queue, pool))
 
 
-asyncio.run(main())
+def find_site(domain: str) -> Type[Site] | None:
+    for site in sites:
+        if domain in site.domains:
+            return site
+
+
+if __name__ == '__main__':
+    log.info('Script started')
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt as error:
+        log.info('Script closed by user')
+    finally:
+        log.info('End of script')

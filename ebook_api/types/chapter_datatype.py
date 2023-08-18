@@ -1,14 +1,11 @@
-"""The Chapter datatype"""
-
 from dataclasses import dataclass
-from typing import Tuple
 
-from bs4 import Tag
+from .media_datatype import MediaDatatype
+from .tag_datatype import TagDatatype
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True, eq=False)
 class ChapterDatatype:
     name: str
-    tags: Tuple[Tag]
-    css_styles: Tuple[str]
-    properties: Tuple[str]
+    tags: tuple[TagDatatype]
+    css_styles: tuple[MediaDatatype]

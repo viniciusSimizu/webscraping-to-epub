@@ -1,39 +1,45 @@
 import asyncio
 import logging
-from dataclasses import dataclass
 import re
-from typing import List, Optional, Tuple
-from pipe import map
+from concurrent.futures import ProcessPoolExecutor
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Coroutine, Optional
 
 from aiohttp import ClientResponseError, ClientSession
 from bs4 import BeautifulSoup, Tag
-from ebook_api.types.chapter_datatype import ChapterDatatype
-from ebook_api.types.metadata_datatype import MetadataDatatype
 
+from constants import CSS_FOLDER
+from ebook_api.types.chapter_datatype import ChapterDatatype
+from ebook_api.types.media_datatype import MediaDatatype
+from ebook_api.types.metadata_datatype import MetadataDatatype
+from ebook_api.types.tag_datatype import TagDatatype
 from ebook_api.types.volume_datatype import VolumeDatatype
 
 from ..site_abstract import Site
 
+log = logging.getLogger(__name__)
 
-@dataclass
+
+@dataclass(frozen=True, eq=False, kw_only=True)
 class RawChapterDatatype:
     url: str
     name: str
 
 
-@dataclass
+@dataclass(frozen=True, eq=False, kw_only=True)
 class RawVolumeDatatype:
-    cover_url: str | None
+    cover_url: Optional[str]
     title: str
     series: str
     author: str
-    chapters: Tuple[RawChapterDatatype]
+    chapters: tuple[RawChapterDatatype]
 
 
-@dataclass
+@dataclass(frozen=True, eq=False, kw_only=True)
 class RawVolumeDatatypeAddons:
-    series: str | None = None
-    author: str | None = None
+    series: Optional[str] = field(default=None)
+    author: str = field(init=False, default='Shōgo Kinugasa')
 
 
 class Helper:
@@ -48,15 +54,28 @@ class Helper:
 
 @dataclass
 class AnimeCenterBr(Site):
-    domains = ('animecenterbr',)
     client: ClientSession
-    queue: asyncio.Queue
+    queue: asyncio.Queue[VolumeDatatype | None]
+    pool: ProcessPoolExecutor
+
+    domains: tuple[str] = field(init=False, default=('animecenterbr',))
+    toc_style: str = field(init=False, default='toc.css')
+    chapter_style: str = field(init=False, default='chapter.css')
 
     def __post_init__(self) -> None:
-        self.toc_style = 'toc.css'
-        self.chapter_style = 'chapter.css'
+        self.toc_style: MediaDatatype = MediaDatatype(filename=self.toc_style,
+                                                      content=(
+                                                          Path(CSS_FOLDER) / self.toc_style).read_bytes(),
+                                                      extension='.css',
+                                                      media_type='text/css')
+        self.chapter_style: MediaDatatype = MediaDatatype(filename=self.chapter_style,
+                                                          content=(
+                                                              Path(CSS_FOLDER) / self.chapter_style).read_bytes(),
+                                                          extension='.css',
+                                                          media_type='text/css')
 
-    async def extract_volume_data(self, url: str) -> Tuple[VolumeDatatype]:
+    async def producer_volume_data(self, url: str) -> None:
+        log.debug(f"Producer is running")
         # try:
         #     async with self.client.get(url) as response:
         #         soup = BeautifulSoup(markup=await response.text('utf-8'), features='html.parser')
@@ -65,76 +84,94 @@ class AnimeCenterBr(Site):
         #         f"REQUEST ERROR - status: [{error.status}], message: \"{error.message}\" - trying to connect in {url}")
         #     raise ClientResponseError
 
-        with open('test.html', 'r') as file:
-            soup = BeautifulSoup(markup=file, features='html.parser')
+        soup = BeautifulSoup(markup=Path('test.html').read_text('utf-8'),
+                             features='html.parser')
 
-        content: Tag = soup.select_one('.post-text-content')
-        self.clean_soup(content)
+        soup: Tag = soup.select_one('.post-text-content')
+        self.clean_soup(soup)
 
-        series = content.select_one(
+        series = soup.select_one(
             ':scope > h3:first-of-type').get_text(strip=True)
 
-        page_info: RawVolumeDatatype = self.get_raw_volume(content)
+        # Remove introduction
+        self.get_raw_volume(soup)
 
-        addons = RawVolumeDatatypeAddons(series=page_info.series)
+        addons = RawVolumeDatatypeAddons(series=series)
 
-        while raw_volume := self.get_raw_volume(content, addons):
-            tasks = [self.extract_chapter_content(raw_chapter)
-                     for raw_chapter in raw_volume.chapters]
+        while raw_volume := self.get_raw_volume(soup, addons):
+            tasks: list[Coroutine[any, any, BeautifulSoup]] = [self.extract_page(raw_chapter.url)
+                                                               for raw_chapter in raw_volume.chapters]
 
-            chapters: List[ChapterDatatype] = []
+            list_chapter_content: tuple[BeautifulSoup] = await asyncio.gather(*tasks)
 
-            for raw_chapter, tags_chapter in zip(raw_volume.chapters, await asyncio.gather(*tasks)):
-                chapters.append(self.chapter_factory(raw_chapter=raw_chapter,
-                                                     tags=tags_chapter))
+            chapters: list[ChapterDatatype] = []
+
+            for raw_chapter, tags in zip(raw_volume.chapters, map(self.extract_chapter_tags, list_chapter_content)):
+                chapters.append(await self.chapter_factory(raw_chapter=raw_chapter,
+                                                           tags=tuple(tags)))
 
             volume_data = self.volume_factory(raw_volume, tuple(chapters))
-
-            print(volume_data)
 
             await self.queue.put(volume_data)
             break
 
-    async def extract_chapter_content(self, raw_chapter: RawChapterDatatype) -> List[Tag]:
-        async with self.client.get(raw_chapter.url) as response:
-            soup = BeautifulSoup(await response.text('utf-8'))
+        await self.queue.put(None)
+        log.debug(f"Producer is closed")
 
+    def extract_chapter_tags(self, soup: BeautifulSoup) -> tuple[TagDatatype]:
         content: Tag = soup.select_one('.post-text-content')
-        self.clean_soup(content)
 
         tags_to_format = content.select(':is(p, h1, h2, li)')
         for tag in tags_to_format:
-            tag.string = Helper.strip_string(tag.get_text())
+            tag.string = Helper.strip_string(tag.get_text(strip=True))
 
             if not tag.string:
                 tag.extract()
 
-        tags: List[Tag] = []
+        tags: list[TagDatatype] = []
 
-        for tag in content.select(':is(img, p, h1, h2, ul)'):
+        for tag in content.select(':is(img, p, h1, h2, h3, ul)'):
+            elem: Tag | None = None
+
             match tag.name:
                 case 'img':
-                    img = soup.new_tag('img')
-                    img['src'] = tag['src']
-                    tags.append(img)
+                    elem = soup.new_tag('img')
+                    elem['src'] = tag['src']
                 case 'ul':
-                    ul = soup.new_tag('ul')
+                    elem = soup.new_tag('ul')
 
                     for a in tag.select('a'):
                         a_ = soup.new_tag('a')
                         a_.string = a.get_text(strip=True)
                         a_['href'] = a['href']
-                        ul.append(a_)
-                    tags.append(ul)
+                        elem.append(a_)
                 case _:
                     string = tag.get_text(strip=True)
 
-                    t = soup.new_tag(
-                        tag.name if not Helper.is_heading(string) else 'h3')
-                    t.string = string
-                    tags.append(t)
+                    if tag.name in ['h1', 'h2', 'h3'] or Helper.is_heading(string):
+                        elem = soup.new_tag('h3')
+                    else:
+                        elem = soup.new_tag('p')
 
-        return tags
+                    elem.string = string
+
+            tags.append(elem)
+
+        return tuple(tags)
+
+    async def extract_page(self, url: str) -> BeautifulSoup:
+        async with self.client.get(url) as response:
+            soup = BeautifulSoup(markup=await response.text('utf-8'),
+                                 features='html.parser')
+
+        self.clean_soup(soup)
+        return soup
+
+    async def extract_media(self, url: str) -> MediaDatatype:
+        async with self.client.get(url) as response:
+            return MediaDatatype(filename=response.url.name,
+                                 content=await response.read(),
+                                 media_type=response.content_type)
 
     def get_raw_volume(self, soup: BeautifulSoup | Tag, addons: Optional[RawVolumeDatatypeAddons] = None) -> RawVolumeDatatype | None:
         img = soup.select_one(
@@ -146,10 +183,12 @@ class AnimeCenterBr(Site):
             return
 
         for tag in [img, title, chapters]:
-            if tag:
-                tag.extract()
+            if not tag:
+                continue
 
-        raw_chapters: List[RawChapterDatatype] = []
+            tag.extract()
+
+        raw_chapters: list[RawChapterDatatype] = []
 
         for tag in chapters.select('a'):
             raw_chapters.append(RawChapterDatatype(name=tag.get_text(strip=True),
@@ -169,27 +208,32 @@ class AnimeCenterBr(Site):
         for tag in page_owner + useless_tags:
             tag.extract()
 
-    def volume_factory(self, raw_volume: RawVolumeDatatype, chapters: Tuple[ChapterDatatype]) -> VolumeDatatype:
-        metadata1 = MetadataDatatype(namespace=None,
-                                     name='meta',
-                                     value='',
-                                     others={'name': 'calibre:series', 'content': raw_volume.series})
+    def volume_factory(self, raw_volume: RawVolumeDatatype, chapters: tuple[ChapterDatatype]) -> VolumeDatatype:
+        metadata_series = MetadataDatatype(namespace=None,
+                                           name='meta',
+                                           value='',
+                                           others={'name': 'calibre:series', 'content': raw_volume.series})
 
         return VolumeDatatype(title=raw_volume.title,
                               author=raw_volume.author,
-                              cover_url=raw_volume.cover_url,
+                              cover=raw_volume.cover_url,
                               series=raw_volume.series,
-                              chapters=chapters,
+                              all_chapters=chapters,
                               toc_css_styles=tuple([self.toc_style]),
                               chapter_css_styles=tuple([self.chapter_style]),
                               direction='rtl',
                               lang='pt-BR',
-                              metadata=tuple([metadata1]))
+                              metadata=tuple([metadata_series]))
 
-    def chapter_factory(self, raw_chapter: RawChapterDatatype, tags: Tuple[Tag]) -> ChapterDatatype:
-        properties = 'rendition:layout-pre-paginated rendition:orientation-auto rendition:spread-auto rendition:flow-paginated'
-
+    async def chapter_factory(self, raw_chapter: RawChapterDatatype, tags: tuple[Tag]) -> ChapterDatatype:
         return ChapterDatatype(name=raw_chapter.name,
-                               tags=tags,
-                               css_styles=tuple([self.chapter_style]),
-                               properties=properties)
+                               tags=tuple(await asyncio.gather(*map(self.tag_factory, tags))),
+                               css_styles=tuple([self.chapter_style]))
+
+    async def tag_factory(self, tag: Tag) -> TagDatatype:
+        if tag.name == 'img':
+            return TagDatatype(name=tag.name,
+                               media=await self.extract_media(tag['src']))
+
+        return TagDatatype(name=tag.name,
+                           text=tag.get_text(strip=True))

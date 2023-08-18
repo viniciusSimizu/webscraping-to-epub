@@ -1,10 +1,10 @@
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Optional
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True, eq=False)
 class MetadataDatatype:
-    namespace: Any
-    name: Any
-    value: Any
-    others: Any | None = None
+    namespace: any
+    name: any
+    value: any
+    others: Optional[any] = field(default=None)

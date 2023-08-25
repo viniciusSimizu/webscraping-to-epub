@@ -1,0 +1,103 @@
+2023-08-24 21:02:05,729 [INFO]: Script started.
+2023-08-24 21:02:05,729 [DEBUG]: Using selector: EpollSelector.
+2023-08-24 21:02:05,734 [DEBUG]: Attempting to acquire lock 139624865854096 on /home/simizu/.cache/python-tldextract/3.11.4.final__venv__a363db__tldextract-3.4.4/publicsuffix.org-tlds/de84b5ca2167d4c83e38fb162f2e8738.tldextract.json.lock.
+2023-08-24 21:02:05,734 [DEBUG]: Lock 139624865854096 acquired on /home/simizu/.cache/python-tldextract/3.11.4.final__venv__a363db__tldextract-3.4.4/publicsuffix.org-tlds/de84b5ca2167d4c83e38fb162f2e8738.tldextract.json.lock.
+2023-08-24 21:02:05,736 [DEBUG]: Attempting to release lock 139624865854096 on /home/simizu/.cache/python-tldextract/3.11.4.final__venv__a363db__tldextract-3.4.4/publicsuffix.org-tlds/de84b5ca2167d4c83e38fb162f2e8738.tldextract.json.lock.
+2023-08-24 21:02:05,736 [DEBUG]: Lock 139624865854096 released on /home/simizu/.cache/python-tldextract/3.11.4.final__venv__a363db__tldextract-3.4.4/publicsuffix.org-tlds/de84b5ca2167d4c83e38fb162f2e8738.tldextract.json.lock.
+2023-08-24 21:02:05,786 [INFO]: Processing following url: https://www.animecenterbr.com/youkoso-jitsuryoku-light-novel-pt-br/.
+2023-08-24 21:02:05,787 [DEBUG]: Producer is running.
+2023-08-24 21:02:05,886 [INFO]: Source page loaded.
+2023-08-24 21:02:06,579 [INFO]: Chapter loaded 'Informações!'.
+2023-08-24 21:02:07,787 [INFO]: Chapter loaded 'Prólogo: O Monólogo de Ken Sudou'.
+2023-08-24 21:02:09,239 [INFO]: Chapter loaded 'Capítulo 1: O Festival de Esportes começa'.
+2023-08-24 21:02:09,876 [INFO]: Chapter loaded 'Capítulo 2: O Planejamento Estratégico da Classe D'.
+2023-08-24 21:02:10,373 [INFO]: Chapter loaded 'Capítulo 3: Todos os pensamentos'.
+2023-08-24 21:02:11,414 [INFO]: Chapter loaded 'Capítulo 4: Como seu relacionamento veio a ser'.
+2023-08-24 21:02:17,570 [INFO]: Chapter loaded 'Capítulo 5: Levantando as Cortinas'.
+2023-08-24 21:02:18,758 [INFO]: Chapter loaded 'Capítulo 6: Por quem?'.
+2023-08-24 21:02:20,333 [INFO]: Chapter loaded 'Capítulo 7: O que você e eu não temos'.
+2023-08-24 21:02:22,482 [INFO]: Chapter loaded 'Epílogo: Início de uma nova era'.
+2023-08-24 21:02:22,650 [INFO]: Chapter loaded 'Posfácio'.
+2023-08-24 21:02:22,791 [INFO]: Chapter loaded 'SS Ichinose: Festival dos esportes – A batalha de Ichinose'.
+2023-08-24 21:02:22,939 [INFO]: Chapter loaded 'SS Karuizawa: A mente complexa de uma donzela'.
+2023-08-24 21:02:23,235 [INFO]: Chapter loaded 'Apoie o Site'.
+2023-08-24 21:02:23,283 [INFO]: Volume loaded 'Volume 05 – Completo (Revisado)'.
+2023-08-24 21:02:23,323 [DEBUG]: Producer has closed.
+2023-08-24 21:02:23,324 [DEBUG]: Volume batched 'Volume 05 – Completo (Revisado)'.
+2023-08-24 21:02:23,437 [INFO]: Volume start saving: 'Volume 05 – Completo (Revisado)'.
+2023-08-24 21:02:23,447 [DEBUG]: Volume Volume 05 – Completo (Revisado) setup finish.
+2023-08-24 21:02:23,450 [DEBUG]: Chapter start saving: 'Informações!'.
+2023-08-24 21:02:23,450 [DEBUG]: Chapter 'Informações!' setup finished.
+2023-08-24 21:02:23,451 [DEBUG]: Chapter 'Informações!' styles loaded.
+2023-08-24 21:02:23,453 [WARNING]: Non implemented Tag 'ul'.
+2023-08-24 21:02:23,453 [DEBUG]: Chapter 'Informações!' content loaded.
+2023-08-24 21:02:23,453 [DEBUG]: Chapter end saving: 'Informações!'.
+2023-08-24 21:02:23,454 [DEBUG]: Chapter start saving: 'Prólogo: O Monólogo de Ken Sudou'.
+2023-08-24 21:02:23,455 [DEBUG]: Chapter 'Prólogo: O Monólogo de Ken Sudou' setup finished.
+2023-08-24 21:02:23,455 [DEBUG]: Chapter 'Prólogo: O Monólogo de Ken Sudou' styles loaded.
+2023-08-24 21:02:23,456 [DEBUG]: Chapter 'Prólogo: O Monólogo de Ken Sudou' content loaded.
+2023-08-24 21:02:23,457 [DEBUG]: Chapter end saving: 'Prólogo: O Monólogo de Ken Sudou'.
+2023-08-24 21:02:23,457 [DEBUG]: Chapter start saving: 'Capítulo 1: O Festival de Esportes começa'.
+2023-08-24 21:02:23,458 [DEBUG]: Chapter 'Capítulo 1: O Festival de Esportes começa' setup finished.
+2023-08-24 21:02:23,458 [DEBUG]: Chapter 'Capítulo 1: O Festival de Esportes começa' styles loaded.
+2023-08-24 21:02:23,482 [DEBUG]: Chapter 'Capítulo 1: O Festival de Esportes começa' content loaded.
+2023-08-24 21:02:23,482 [DEBUG]: Chapter end saving: 'Capítulo 1: O Festival de Esportes começa'.
+2023-08-24 21:02:23,482 [DEBUG]: Chapter start saving: 'Capítulo 2: O Planejamento Estratégico da Classe D'.
+2023-08-24 21:02:23,482 [DEBUG]: Chapter 'Capítulo 2: O Planejamento Estratégico da Classe D' setup finished.
+2023-08-24 21:02:23,483 [DEBUG]: Chapter 'Capítulo 2: O Planejamento Estratégico da Classe D' styles loaded.
+2023-08-24 21:02:23,502 [DEBUG]: Chapter 'Capítulo 2: O Planejamento Estratégico da Classe D' content loaded.
+2023-08-24 21:02:23,502 [DEBUG]: Chapter end saving: 'Capítulo 2: O Planejamento Estratégico da Classe D'.
+2023-08-24 21:02:23,503 [DEBUG]: Chapter start saving: 'Capítulo 3: Todos os pensamentos'.
+2023-08-24 21:02:23,503 [DEBUG]: Chapter 'Capítulo 3: Todos os pensamentos' setup finished.
+2023-08-24 21:02:23,503 [DEBUG]: Chapter 'Capítulo 3: Todos os pensamentos' styles loaded.
+2023-08-24 21:02:23,520 [DEBUG]: Chapter 'Capítulo 3: Todos os pensamentos' content loaded.
+2023-08-24 21:02:23,521 [DEBUG]: Chapter end saving: 'Capítulo 3: Todos os pensamentos'.
+2023-08-24 21:02:23,521 [DEBUG]: Chapter start saving: 'Capítulo 4: Como seu relacionamento veio a ser'.
+2023-08-24 21:02:23,522 [DEBUG]: Chapter 'Capítulo 4: Como seu relacionamento veio a ser' setup finished.
+2023-08-24 21:02:23,522 [DEBUG]: Chapter 'Capítulo 4: Como seu relacionamento veio a ser' styles loaded.
+2023-08-24 21:02:23,546 [DEBUG]: Chapter 'Capítulo 4: Como seu relacionamento veio a ser' content loaded.
+2023-08-24 21:02:23,546 [DEBUG]: Chapter end saving: 'Capítulo 4: Como seu relacionamento veio a ser'.
+2023-08-24 21:02:23,547 [DEBUG]: Chapter start saving: 'Capítulo 5: Levantando as Cortinas'.
+2023-08-24 21:02:23,548 [DEBUG]: Chapter 'Capítulo 5: Levantando as Cortinas' setup finished.
+2023-08-24 21:02:23,548 [DEBUG]: Chapter 'Capítulo 5: Levantando as Cortinas' styles loaded.
+2023-08-24 21:02:23,633 [DEBUG]: Chapter 'Capítulo 5: Levantando as Cortinas' content loaded.
+2023-08-24 21:02:23,633 [DEBUG]: Chapter end saving: 'Capítulo 5: Levantando as Cortinas'.
+2023-08-24 21:02:23,634 [DEBUG]: Chapter start saving: 'Capítulo 6: Por quem?'.
+2023-08-24 21:02:23,635 [DEBUG]: Chapter 'Capítulo 6: Por quem?' setup finished.
+2023-08-24 21:02:23,635 [DEBUG]: Chapter 'Capítulo 6: Por quem?' styles loaded.
+2023-08-24 21:02:23,656 [DEBUG]: Chapter 'Capítulo 6: Por quem?' content loaded.
+2023-08-24 21:02:23,656 [DEBUG]: Chapter end saving: 'Capítulo 6: Por quem?'.
+2023-08-24 21:02:23,657 [DEBUG]: Chapter start saving: 'Capítulo 7: O que você e eu não temos'.
+2023-08-24 21:02:23,657 [DEBUG]: Chapter 'Capítulo 7: O que você e eu não temos' setup finished.
+2023-08-24 21:02:23,658 [DEBUG]: Chapter 'Capítulo 7: O que você e eu não temos' styles loaded.
+2023-08-24 21:02:23,686 [DEBUG]: Chapter 'Capítulo 7: O que você e eu não temos' content loaded.
+2023-08-24 21:02:23,687 [DEBUG]: Chapter end saving: 'Capítulo 7: O que você e eu não temos'.
+2023-08-24 21:02:23,687 [DEBUG]: Chapter start saving: 'Epílogo: Início de uma nova era'.
+2023-08-24 21:02:23,688 [DEBUG]: Chapter 'Epílogo: Início de uma nova era' setup finished.
+2023-08-24 21:02:23,688 [DEBUG]: Chapter 'Epílogo: Início de uma nova era' styles loaded.
+2023-08-24 21:02:23,726 [DEBUG]: Chapter 'Epílogo: Início de uma nova era' content loaded.
+2023-08-24 21:02:23,726 [DEBUG]: Chapter end saving: 'Epílogo: Início de uma nova era'.
+2023-08-24 21:02:23,726 [DEBUG]: Chapter start saving: 'Posfácio'.
+2023-08-24 21:02:23,726 [DEBUG]: Chapter 'Posfácio' setup finished.
+2023-08-24 21:02:23,727 [DEBUG]: Chapter 'Posfácio' styles loaded.
+2023-08-24 21:02:23,727 [DEBUG]: Chapter 'Posfácio' content loaded.
+2023-08-24 21:02:23,727 [DEBUG]: Chapter end saving: 'Posfácio'.
+2023-08-24 21:02:23,728 [DEBUG]: Chapter start saving: 'SS Ichinose: Festival dos esportes – A batalha de Ichinose'.
+2023-08-24 21:02:23,728 [DEBUG]: Chapter 'SS Ichinose: Festival dos esportes – A batalha de Ichinose' setup finished.
+2023-08-24 21:02:23,728 [DEBUG]: Chapter 'SS Ichinose: Festival dos esportes – A batalha de Ichinose' styles loaded.
+2023-08-24 21:02:23,730 [DEBUG]: Chapter 'SS Ichinose: Festival dos esportes – A batalha de Ichinose' content loaded.
+2023-08-24 21:02:23,731 [DEBUG]: Chapter end saving: 'SS Ichinose: Festival dos esportes – A batalha de Ichinose'.
+2023-08-24 21:02:23,731 [DEBUG]: Chapter start saving: 'SS Karuizawa: A mente complexa de uma donzela'.
+2023-08-24 21:02:23,731 [DEBUG]: Chapter 'SS Karuizawa: A mente complexa de uma donzela' setup finished.
+2023-08-24 21:02:23,731 [DEBUG]: Chapter 'SS Karuizawa: A mente complexa de uma donzela' styles loaded.
+2023-08-24 21:02:23,733 [DEBUG]: Chapter 'SS Karuizawa: A mente complexa de uma donzela' content loaded.
+2023-08-24 21:02:23,733 [DEBUG]: Chapter end saving: 'SS Karuizawa: A mente complexa de uma donzela'.
+2023-08-24 21:02:23,734 [DEBUG]: Chapter start saving: 'Apoie o Site'.
+2023-08-24 21:02:23,734 [DEBUG]: Chapter 'Apoie o Site' setup finished.
+2023-08-24 21:02:23,734 [DEBUG]: Chapter 'Apoie o Site' styles loaded.
+2023-08-24 21:02:23,735 [DEBUG]: Chapter 'Apoie o Site' content loaded.
+2023-08-24 21:02:23,736 [DEBUG]: Chapter end saving: 'Apoie o Site'.
+2023-08-24 21:02:23,736 [DEBUG]: Volume Volume 05 – Completo (Revisado) Chapters loaded.
+2023-08-24 21:02:23,737 [DEBUG]: Volume Volume 05 – Completo (Revisado) book structured.
+2023-08-24 21:02:24,046 [INFO]: Volume end saving: 'Volume 05 – Completo (Revisado)'.
+2023-08-24 21:02:24,093 [INFO]: End of script.

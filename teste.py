@@ -1,21 +1,27 @@
-import asyncio
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-from multiprocessing.pool import Pool, ThreadPool
-import time
+""" from itertools import product
+from pprint import pprint
+import shelve
+from urllib.parse import urlparse
+
+from bs4 import BeautifulSoup
+
+url = "https://www.animecenterbr.com/youkoso-jitsuryoku-light-novel-pt-br/"
 
 
-def func(value: int) -> int:
-    time.sleep(value)
+with shelve.open("pages") as db:
+    soup = BeautifulSoup(db.get(urlparse(url).path), features='html.parser')
 
+    titles = soup.select('.post-text-content > :is(h3, span, strong, p)')
 
-async def main() -> None:
-    values = range(7)
+    for title in titles:
+        print(title.get_text(strip=True))
 
-    with ProcessPoolExecutor(3) as pool:
-        start = time.perf_counter()
-        for _ in pool.map(func, values):
-            end = time.perf_counter()
-            print(end - start)
+ """
 
+import mimetypes
 
-asyncio.run(main())
+mimetypes.add_type('image/webp', '.webp')
+
+type = mimetypes.guess_extension(None)
+
+print(type)

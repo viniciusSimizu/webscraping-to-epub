@@ -2,6 +2,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
+import shelve
 
 from aiohttp import ClientSession
 
@@ -10,6 +11,7 @@ from ebook_api.types.volume_datatype import VolumeDatatype
 
 @dataclass(eq=False, kw_only=True)
 class Site(ABC):
+    db: shelve.Shelf
     client: ClientSession
     queue: asyncio.Queue[VolumeDatatype | None]
     pool: ProcessPoolExecutor

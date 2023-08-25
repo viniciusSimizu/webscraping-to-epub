@@ -1,5 +1,7 @@
+.log
+pages
 __pycache__/
 venv/
-ebooks/*
+ebooks/
 backup/ebooks/*
 links.txt

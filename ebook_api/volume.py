@@ -1,5 +1,6 @@
 import asyncio
-from concurrent.futures import ProcessPoolExecutor
+import logging
+from concurrent.futures import Future, ProcessPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -13,93 +14,112 @@ from ebook_api.utils import EpubUtils
 from .chapter import Chapter
 from .types.volume_datatype import VolumeDatatype
 
+log = logging.getLogger(__name__)
+
 
 @dataclass(eq=False, kw_only=True)
 class Volume:
-    pool: ProcessPoolExecutor
+    data: VolumeDatatype
 
     book: epub.EpubBook = field(init=False, default_factory=epub.EpubBook)
 
     @staticmethod
-    async def consume_volume_data(queue: asyncio.Queue[VolumeDatatype | None], pool: ProcessPoolExecutor) -> None:
+    async def consume_volume_data(
+        queue: asyncio.Queue[VolumeDatatype | None], pool: ProcessPoolExecutor
+    ) -> None:
+        status = True
         batch: list[VolumeDatatype] = []
 
-        while status := True:
+        while status:
             data = await queue.get()
 
             if data is None:
                 status = False
             else:
                 batch.append(data)
+                log.debug(f"Volume batched {data.title!r}")
 
             if (len(batch) >= pool._max_workers) or (not status and batch):
-                pool.map(Volume(pool=pool).load, batch)
+                tasks: list[Future] = []
+                loop = asyncio.get_running_loop()
 
-    def load(self, volume: VolumeDatatype) -> None:
-        # Setup
-        self.book_setup(volume)
+                for volume in [Volume(data=data) for data in batch]:
+                    tasks.append(loop.run_in_executor(pool, Volume.load, volume))
 
-        # Load Chapters
-        for n, result in enumerate(volume.all_chapters):
-            page = Chapter(book=self.book,
-                           chpt_n=n).load(result)
-            self.book.add_item(page)
+                await asyncio.gather(*tasks)
 
-        tasks: list[AsyncResult] = []
-        for n, chapter in enumerate(volume.all_chapters):
-            manager = Chapter(book=self.book,
-                              chpt_n=n)
-            tasks.append(self.pool.apply_async(manager.load, chapter))
+    @staticmethod
+    def load(cls: "Volume") -> None:
+        log.info(f"Volume start saving: {cls.data.title!r}")
 
-        for result in tasks:
-            self.book.add_item(result.get())
+        cls.book_setup()
 
-        # Create Structure
-        self.book_structure()
+        chapters = [
+            Chapter(book=cls.book, chpt_n=n, data=chapter).load()
+            for n, chapter in enumerate(cls.data.all_chapters)
+        ]
+        for chapter in chapters:
+            cls.book.add_item(chapter)
+        log.debug(f"Volume {cls.data.title} Chapters loaded")
 
-        # Save
-        self.save(volume)
+        cls.book_structure()
+        cls.save()
 
-    def save(self, volume: VolumeDatatype) -> None:
+    def save(self) -> None:
         """Save EPUB file"""
-        opts = {'plugins': (SyntaxPlugin(),)}
+        opts = {"plugins": (SyntaxPlugin(),)}
 
-        filename = volume.filename
+        filename = self.data.filename
 
         if not filename:
-            filename = EpubUtils.generate_filename(volume.title)
+            filename = EpubUtils.generate_filename(self.data.title)
 
         path = Path(EBOOK_FOLDER)
 
-        if volume.series:
-            path /= volume.series
+        if self.data.series:
+            path /= self.data.series
 
-        path /= filename + '.epub'
+        path.absolute().mkdir(parents=True, exist_ok=True)
 
-        epub.write_epub(path, opts)
+        path /= filename + ".epub"
 
-    def book_setup(self, volume: VolumeDatatype) -> None:
-        self.book.set_title(volume.title)
-        self.book.set_direction(volume.direction)
-        self.book.set_language(volume.lang)
+        epub.write_epub(name=path, book=self.book, options=opts)
 
-        if volume.series:
-            self.book.add_metadata(None, 'meta', '', {'name': 'calibre:series',
-                                                      'content': volume.series})
+        log.info(f"Volume end saving: {self.data.title!r}")
 
-        if volume.cover:
-            self.book.set_cover(file_name='cover' + volume.cover.media.extension,
-                                content=volume.cover.media.content)
+    def book_setup(self) -> None:
+        self.book.set_title(self.data.title)
+        self.book.set_direction(self.data.direction)
+        self.book.set_language(self.data.lang)
 
-        if volume.author:
-            self.book.add_author(volume.author)
+        if self.data.series:
+            self.book.add_metadata(
+                None,
+                "meta",
+                "",
+                {"name": "calibre:series", "content": self.data.series},
+            )
+
+        if self.data.cover:
+            self.book.set_cover(
+                file_name="cover" + self.data.cover.extension,
+                content=self.data.cover.content,
+            )
+
+        if self.data.author:
+            self.book.add_author(self.data.author)
+
+        log.debug(f"Volume {self.data.title} setup finish")
 
     def book_structure(self) -> None:
-        chapters: tuple[epub.EpubHtml] = tuple(self.book.get_items_of_type(ITEM_DOCUMENT)
-                                               | where(lambda item: isinstance(item, epub.EpubHtml)))
+        chapters: tuple[epub.EpubHtml] = tuple(
+            self.book.get_items_of_type(ITEM_DOCUMENT)
+            | where(lambda item: isinstance(item, epub.EpubHtml))
+        )
 
         self.book.toc = chapters
-        self.book.spine = ['nav', *chapters]
+        self.book.spine = ["nav", *chapters]
 
-        if self.book.get_item_with_id('cover'):
-            self.book.spine.insert(0, 'cover')
+        if self.book.get_item_with_id("cover"):
+            self.book.spine.insert(0, "cover")
+        log.debug(f"Volume {self.data.title} book structured")

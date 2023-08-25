@@ -22,7 +22,7 @@ class MediaDatatype:
             self.__try_filename(self.filename)
 
     def __try_media_type(self, media_type: str) -> None:
-        extension = guess_extension(media_type)
+        extension = guess_extension(media_type, strict=False)
         self.extension = extension
 
         if self.filename:
@@ -30,7 +30,7 @@ class MediaDatatype:
             self.filename += extension
 
     def __try_extension(self, extension: str) -> None:
-        media_type, _ = guess_type('_' + extension)
+        media_type, _ = guess_type('_' + extension, strict=False)
         self.media_type = media_type
 
         if self.filename:
@@ -38,8 +38,8 @@ class MediaDatatype:
             self.filename += extension
 
     def __try_filename(self, filename: str) -> None:
-        media_type, _ = guess_type(filename)
-        extension = guess_extension(media_type)
+        media_type, _ = guess_type(filename, strict=False)
+        extension = guess_extension(media_type, strict=False)
 
         self.media_type = media_type
         self.extension = extension
